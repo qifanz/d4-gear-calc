@@ -1,0 +1,1229 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<title>D4 装备提升计算器</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #09080c;
+  --panel:    #100e14;
+  --panel2:   #16131c;
+  --panel3:   #1c1825;
+  --border:   #2a2535;
+  --border2:  #3e3650;
+  --gold-dim: #6a4c1e;
+  --gold:     #c8a040;
+  --gold2:    #e8c060;
+  --gold3:    #f5d880;
+  --text:     #c4b89a;
+  --text-dim: #6a6070;
+  --text-br:  #e8e0cc;
+  --magic:    #7878f8;   /* A桶 蓝 */
+  --rare:     #e0c840;   /* B桶 黄 */
+  --legend:   #e88020;   /* C桶 橙 */
+  --skill:    #60c870;   /* 技能 绿 */
+  --crit:     #e06030;   /* 暴击 红橙 */
+  --atkspd:   #40b8d0;   /* 攻速 青 */
+  --green:    #5aaa5a;
+  --green2:   #80e080;
+  --red:      #aa4040;
+  --red2:     #e08080;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  background-image:
+    radial-gradient(ellipse at 20% 50%, rgba(60,20,80,0.15) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 20%, rgba(80,40,10,0.12) 0%, transparent 50%);
+  color: var(--text);
+  font-family: 'Segoe UI', 'Microsoft YaHei', Arial, sans-serif;
+  font-size: 13px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ─── Header ─────────────────────────────────────────── */
+header {
+  background: linear-gradient(180deg, #1a0f06 0%, #0e0a10 100%);
+  border-bottom: 1px solid var(--gold-dim);
+  box-shadow: 0 2px 20px rgba(0,0,0,0.8), 0 1px 0 rgba(200,160,64,0.2);
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-shrink: 0;
+  z-index: 10;
+}
+
+header h1 {
+  font-family: 'Cinzel', Georgia, serif;
+  color: var(--gold2);
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  text-shadow: 0 0 20px rgba(200,160,64,0.5), 0 0 40px rgba(200,100,20,0.3);
+  white-space: nowrap;
+}
+
+.global-bar { display: flex; gap: 16px; align-items: center; }
+.g-field { display: flex; align-items: center; gap: 6px; }
+.g-field label {
+  font-family: 'Cinzel', Georgia, serif;
+  color: var(--text-dim);
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.g-field input {
+  width: 58px;
+  background: var(--panel3);
+  border: 1px solid var(--border2);
+  border-top-color: var(--border);
+  color: var(--gold3);
+  padding: 4px 7px;
+  border-radius: 2px;
+  font-size: 13px;
+  text-align: right;
+  font-family: 'Courier New', monospace;
+}
+.g-field input:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 6px rgba(200,160,64,0.3); }
+.g-field .unit { color: var(--text-dim); font-size: 11px; }
+
+.header-right { margin-left: auto; display: flex; gap: 6px; }
+.hbtn {
+  padding: 5px 12px;
+  background: transparent;
+  border: 1px solid var(--border2);
+  border-radius: 2px;
+  color: var(--text-dim);
+  font-size: 11px;
+  font-family: 'Cinzel', Georgia, serif;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.hbtn:hover { border-color: var(--gold-dim); color: var(--gold); }
+.hbtn.danger:hover { border-color: var(--red); color: var(--red2); }
+
+/* ─── Main Layout ────────────────────────────────────── */
+.main { display: flex; flex: 1; overflow: hidden; }
+
+/* ─── Paper Doll Panel ───────────────────────────────── */
+.doll-panel {
+  width: 230px;
+  background: var(--panel);
+  background-image:
+    radial-gradient(ellipse at 50% 30%, rgba(60,20,80,0.12) 0%, transparent 70%),
+    repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.008) 2px, rgba(255,255,255,0.008) 4px);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 12px 16px;
+  flex-shrink: 0;
+  gap: 0;
+}
+
+.doll-title {
+  font-family: 'Cinzel', Georgia, serif;
+  color: var(--text-dim);
+  font-size: 9px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+/* Paper doll grid */
+.doll-grid {
+  display: grid;
+  grid-template-columns: 64px 64px 64px;
+  grid-template-rows: repeat(5, 64px);
+  gap: 6px;
+}
+
+.slot-cell {
+  position: relative;
+  background: var(--panel2);
+  background-image: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, transparent 60%);
+  border: 1px solid var(--gold-dim);
+  border-radius: 2px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s;
+  gap: 3px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), inset 0 -1px 0 rgba(0,0,0,0.4);
+}
+.slot-cell:hover {
+  border-color: var(--gold);
+  box-shadow: 0 0 10px rgba(200,160,64,0.25), inset 0 1px 0 rgba(255,255,255,0.04);
+}
+.slot-cell.active {
+  border-color: var(--gold2);
+  background: #1e1820;
+  box-shadow: 0 0 16px rgba(200,160,64,0.4), inset 0 0 8px rgba(200,160,64,0.08);
+}
+.slot-cell.empty-cell {
+  background: transparent;
+  border: none;
+  cursor: default;
+  pointer-events: none;
+}
+.slot-cell.char-cell {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  cursor: default;
+  pointer-events: none;
+  grid-row: span 2;
+  box-shadow: none;
+}
+
+.slot-icon { font-size: 22px; line-height: 1; }
+.slot-label {
+  font-family: 'Cinzel', Georgia, serif;
+  font-size: 8px;
+  letter-spacing: 0.5px;
+  color: var(--text-dim);
+  text-align: center;
+  line-height: 1.2;
+}
+.slot-cell.active .slot-label { color: var(--gold); }
+
+/* Data dot */
+.slot-dot {
+  position: absolute;
+  top: 4px; right: 4px;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--legend);
+  box-shadow: 0 0 4px rgba(232,128,32,0.6);
+  display: none;
+}
+.slot-cell.has-data .slot-dot { display: block; }
+
+/* Count badge */
+.slot-count-badge {
+  position: absolute;
+  bottom: 3px; right: 4px;
+  font-size: 9px;
+  color: var(--gold-dim);
+  font-family: monospace;
+}
+.slot-cell.active .slot-count-badge { color: var(--gold); }
+
+/* Character silhouette (center cells) */
+.char-silhouette {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  opacity: 0.25;
+}
+.char-head { font-size: 20px; }
+.char-body { font-size: 26px; }
+
+/* ─── Compare slot selector in doll panel ─── */
+.compare-hint {
+  margin-top: 14px;
+  font-size: 10px;
+  color: var(--text-dim);
+  text-align: center;
+  line-height: 1.5;
+  font-family: 'Cinzel', Georgia, serif;
+  letter-spacing: 0.5px;
+}
+
+/* ─── Editor Panel ───────────────────────────────────── */
+.editor-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--panel);
+  background-image:
+    radial-gradient(ellipse at 50% 0%, rgba(200,160,64,0.04) 0%, transparent 60%);
+  min-width: 0;
+}
+
+/* Editor top bar */
+.editor-bar {
+  padding: 10px 18px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02) 0%, transparent 100%);
+}
+.editor-bar-name {
+  font-family: 'Cinzel', Georgia, serif;
+  color: var(--gold2);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-shadow: 0 0 10px rgba(200,160,64,0.3);
+}
+.editor-bar-type {
+  font-size: 10px;
+  color: var(--text-dim);
+  font-family: 'Cinzel', Georgia, serif;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.editor-bar-actions { margin-left: auto; display: flex; gap: 6px; }
+
+.ebtn {
+  padding: 4px 12px;
+  background: transparent;
+  border: 1px solid var(--border2);
+  border-radius: 2px;
+  color: var(--text-dim);
+  font-size: 10px;
+  font-family: 'Cinzel', Georgia, serif;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.ebtn:hover { border-color: var(--gold-dim); color: var(--gold); }
+.ebtn.compare-btn { border-color: #3a4e28; color: #6a9040; }
+.ebtn.compare-btn:hover { border-color: #6a9040; color: #90c060; }
+.ebtn.compare-btn.active { border-color: #90c060; color: #b0e080; background: rgba(80,120,40,0.15); }
+
+/* Editor body */
+.editor-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  display: grid;
+  gap: 16px;
+}
+.editor-body.single { grid-template-columns: 1fr; max-width: 560px; margin: 0 auto; width: 100%; }
+.editor-body.dual   { grid-template-columns: 1fr 1fr; }
+
+/* Item card (D4 tooltip style) */
+.item-card {
+  background: var(--panel2);
+  background-image:
+    linear-gradient(180deg, rgba(200,160,64,0.06) 0%, transparent 40%),
+    repeating-linear-gradient(0deg, transparent, transparent 20px, rgba(255,255,255,0.006) 20px, rgba(255,255,255,0.006) 21px);
+  border: 1px solid var(--gold-dim);
+  border-radius: 3px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.6), inset 0 1px 0 rgba(200,160,64,0.12);
+  overflow: hidden;
+}
+
+.card-header {
+  padding: 12px 14px 10px;
+  border-bottom: 1px solid var(--border2);
+  background: linear-gradient(180deg, rgba(200,160,64,0.08) 0%, transparent 100%);
+}
+.card-title {
+  font-family: 'Cinzel', Georgia, serif;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  color: var(--gold2);
+  text-shadow: 0 0 8px rgba(200,160,64,0.4);
+}
+.card-title.candidate { color: #a0d060; text-shadow: 0 0 8px rgba(120,200,60,0.3); }
+.card-subtitle {
+  font-family: 'Cinzel', Georgia, serif;
+  font-size: 9px;
+  color: var(--text-dim);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-top: 3px;
+}
+
+.card-divider {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 14px;
+  margin: 0;
+}
+.card-divider-line { flex: 1; height: 1px; background: var(--gold-dim); opacity: 0.5; }
+.card-divider-gem { color: var(--gold-dim); font-size: 8px; }
+
+.card-body { padding: 10px 14px 14px; }
+
+/* Affix rows */
+.affix-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 0;
+  border-bottom: 1px solid rgba(42,37,53,0.5);
+}
+.affix-row:last-of-type { border-bottom: none; }
+
+.affix-bullet {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.bullet-A       { background: var(--magic); box-shadow: 0 0 4px var(--magic); }
+.bullet-B       { background: var(--rare);  box-shadow: 0 0 4px rgba(224,200,64,0.6); }
+.bullet-C       { background: var(--legend);box-shadow: 0 0 4px rgba(232,128,32,0.6); }
+.bullet-skill   { background: var(--skill); box-shadow: 0 0 4px rgba(96,200,112,0.6); }
+.bullet-mainstat{ background: var(--red2);  box-shadow: 0 0 4px rgba(224,128,128,0.6); }
+.bullet-critrate{ background: var(--crit);  box-shadow: 0 0 4px rgba(224,96,48,0.6); }
+.bullet-critdmg { background: #e8b040;      box-shadow: 0 0 4px rgba(232,176,64,0.6); }
+.bullet-atkspd  { background: var(--atkspd);box-shadow: 0 0 4px rgba(64,184,208,0.6); }
+
+.affix-select {
+  flex: 1;
+  min-width: 0;
+  background: rgba(0,0,0,0.4);
+  border: 1px solid var(--border2);
+  border-radius: 2px;
+  padding: 4px 6px;
+  font-size: 11px;
+  color: var(--text);
+}
+.affix-select:focus { outline: none; border-color: var(--gold-dim); }
+
+/* Row color tinting by bucket */
+.affix-row.bucket-A .affix-select    { color: var(--magic); }
+.affix-row.bucket-B .affix-select    { color: var(--rare); }
+.affix-row.bucket-C .affix-select    { color: var(--legend); }
+.affix-row.bucket-skill .affix-select{ color: var(--skill); }
+.affix-row.bucket-mainstat .affix-select{ color: var(--red2); }
+.affix-row.bucket-critrate .affix-select{ color: var(--crit); }
+.affix-row.bucket-critdmg .affix-select { color: #e8b040; }
+.affix-row.bucket-atkspd .affix-select  { color: var(--atkspd); }
+
+.affix-custom-name {
+  width: 88px;
+  background: rgba(0,0,0,0.4);
+  border: 1px solid var(--border2);
+  border-radius: 2px;
+  padding: 4px 6px;
+  font-size: 11px;
+  color: var(--legend);
+}
+.affix-custom-name:focus { outline: none; border-color: var(--legend); }
+.affix-bucket-sel {
+  width: 58px;
+  background: rgba(0,0,0,0.4);
+  border: 1px solid var(--border2);
+  border-radius: 2px;
+  padding: 4px 4px;
+  font-size: 10px;
+  color: var(--text-dim);
+}
+.affix-bucket-sel:focus { outline: none; border-color: var(--gold-dim); }
+
+.affix-val {
+  width: 64px;
+  background: rgba(0,0,0,0.5);
+  border: 1px solid var(--border2);
+  border-radius: 2px;
+  padding: 4px 6px;
+  font-size: 13px;
+  font-family: 'Courier New', monospace;
+  color: var(--text-br);
+  text-align: right;
+  flex-shrink: 0;
+}
+.affix-val:focus { outline: none; border-color: var(--gold); color: var(--gold3); }
+.affix-unit { color: var(--text-dim); font-size: 11px; width: 14px; flex-shrink: 0; }
+
+.btn-rm {
+  background: none;
+  border: none;
+  color: var(--border2);
+  cursor: pointer;
+  padding: 2px 4px;
+  font-size: 14px;
+  line-height: 1;
+  border-radius: 2px;
+  transition: all 0.12s;
+  flex-shrink: 0;
+}
+.btn-rm:hover { color: var(--red2); background: rgba(160,60,60,0.15); }
+
+.add-affix-wrap { margin-top: 12px; }
+.btn-add {
+  width: 100%;
+  padding: 7px;
+  background: transparent;
+  border: 1px dashed var(--border2);
+  border-radius: 2px;
+  color: var(--text-dim);
+  font-family: 'Cinzel', Georgia, serif;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-transform: uppercase;
+}
+.btn-add:hover { border-color: var(--gold-dim); color: var(--gold); }
+
+/* Empty state */
+.empty-editor {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 14px;
+  color: var(--text-dim);
+  user-select: none;
+}
+.empty-rune {
+  font-size: 48px;
+  opacity: 0.2;
+  filter: sepia(1) hue-rotate(10deg);
+}
+.empty-text {
+  font-family: 'Cinzel', Georgia, serif;
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  opacity: 0.5;
+}
+
+/* ─── Results Panel ──────────────────────────────────── */
+.results-panel {
+  width: 248px;
+  background: var(--panel);
+  background-image:
+    repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.006) 2px, rgba(255,255,255,0.006) 4px);
+  border-left: 1px solid var(--border);
+  overflow-y: auto;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.res-header {
+  padding: 12px 14px 10px;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(180deg, rgba(200,160,64,0.06) 0%, transparent 100%);
+}
+.res-header-title {
+  font-family: 'Cinzel', Georgia, serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--gold);
+  text-shadow: 0 0 8px rgba(200,160,64,0.3);
+}
+
+.res-body { padding: 12px 14px; display: flex; flex-direction: column; gap: 12px; }
+
+.res-section { display: flex; flex-direction: column; gap: 0; }
+.res-section-label {
+  font-family: 'Cinzel', Georgia, serif;
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--border);
+}
+
+.res-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 0;
+}
+.res-label { color: var(--text-dim); font-size: 11px; }
+.res-val {
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  color: var(--text-br);
+}
+.res-val.gold  { color: var(--gold2); }
+.res-val.magic { color: var(--magic); }
+.res-val.rare  { color: var(--rare); }
+.res-val.legend{ color: var(--legend); }
+
+.res-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
+  margin: 2px 0;
+}
+
+.res-big {
+  background: var(--panel2);
+  border: 1px solid var(--gold-dim);
+  border-radius: 2px;
+  padding: 10px 12px;
+  text-align: center;
+  box-shadow: inset 0 1px 0 rgba(200,160,64,0.08);
+}
+.res-big-label {
+  font-family: 'Cinzel', Georgia, serif;
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 5px;
+}
+.res-big-val {
+  font-size: 24px;
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
+  color: var(--gold2);
+  text-shadow: 0 0 10px rgba(200,160,64,0.4);
+}
+.res-big-val.pos { color: var(--green2);  text-shadow: 0 0 10px rgba(100,220,100,0.35); }
+.res-big-val.neg { color: var(--red2);    text-shadow: 0 0 10px rgba(220,100,100,0.35); }
+
+.delta {
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 2px;
+}
+.delta.pos { background: rgba(80,160,80,0.15); color: var(--green2); }
+.delta.neg { background: rgba(160,80,80,0.15); color: var(--red2); }
+.delta.zero { color: var(--text-dim); }
+
+/* ─── Scrollbar ──────────────────────────────────────── */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: var(--gold-dim); }
+
+select option { background: #1a1625; color: var(--text); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>⚔ D4 GEAR CALCULATOR</h1>
+  <div class="global-bar">
+    <div class="g-field">
+      <label>Base Crit</label>
+      <input id="g-crit-rate" type="number" value="5" min="0" max="100" step="0.1">
+      <span class="unit">%</span>
+    </div>
+    <div class="g-field">
+      <label>Skill Bonus</label>
+      <input id="g-skill-bonus" type="number" value="0" min="0" step="1">
+      <span class="unit">%</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <button class="hbtn" onclick="exportJSON()">导出</button>
+    <button class="hbtn" onclick="importJSON()">导入</button>
+    <button class="hbtn danger" onclick="clearAll()">清空</button>
+  </div>
+</header>
+
+<div class="main">
+  <!-- Paper Doll -->
+  <div class="doll-panel">
+    <div class="doll-title">装备槽位</div>
+    <div class="doll-grid" id="doll-grid">
+      <!-- rendered by JS -->
+    </div>
+    <div class="compare-hint" id="compare-hint" style="display:none">
+      点击「对比候选」<br>输入候选装备词缀
+    </div>
+  </div>
+
+  <!-- Affix Editor -->
+  <div class="editor-panel">
+    <div class="editor-bar" id="editor-bar">
+      <span class="editor-bar-name" id="editor-bar-name">选择装备槽位</span>
+      <span class="editor-bar-type" id="editor-bar-type"></span>
+      <div class="editor-bar-actions" id="editor-bar-actions"></div>
+    </div>
+    <div class="editor-body single" id="editor-body">
+      <div class="empty-editor">
+        <div class="empty-rune">🔱</div>
+        <div class="empty-text">选择左侧装备槽位</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Results -->
+  <div class="results-panel">
+    <div class="res-header">
+      <div class="res-header-title">伤害面板</div>
+    </div>
+    <div class="res-body" id="results-body">
+      <!-- rendered by JS -->
+    </div>
+  </div>
+</div>
+
+<input type="file" id="import-file" accept=".json" style="display:none" onchange="handleImport(event)">
+
+<script>
+// ─── Presets ──────────────────────────────────────────
+const PRESETS = [
+  { id:'mainstat',   name:'主属性',          bucket:'mainstat', unit:'pts' },
+  { id:'skill_dmg',  name:'技能伤害',         bucket:'skill',    unit:'%' },
+  { id:'crit_rate',  name:'暴击率',           bucket:'critrate', unit:'%' },
+  { id:'crit_dmg',   name:'暴击伤害',         bucket:'critdmg',  unit:'%' },
+  { id:'atk_spd',    name:'攻击速度',         bucket:'atkspd',   unit:'%' },
+  { id:'a_dmg',      name:'伤害加成(+)',      bucket:'A',        unit:'%' },
+  { id:'a_core',     name:'核心技能伤害(+)',  bucket:'A',        unit:'%' },
+  { id:'a_basic',    name:'基础技能伤害(+)',  bucket:'A',        unit:'%' },
+  { id:'a_wrath',    name:'愤怒技能伤害(+)',  bucket:'A',        unit:'%' },
+  { id:'a_macabre',  name:'阴森技能伤害(+)',  bucket:'A',        unit:'%' },
+  { id:'a_conjure',  name:'召唤技能伤害(+)',  bucket:'A',        unit:'%' },
+  { id:'a_trap',     name:'陷阱技能伤害(+)',  bucket:'A',        unit:'%' },
+  { id:'a_agility',  name:'敏捷技能伤害(+)',  bucket:'A',        unit:'%' },
+  { id:'a_companion',name:'同伴技能伤害(+)',  bucket:'A',        unit:'%' },
+  { id:'b_vul',      name:'易伤伤害',         bucket:'B', cat:'vul',       unit:'%' },
+  { id:'b_fire',     name:'火焰伤害',         bucket:'B', cat:'fire',      unit:'%' },
+  { id:'b_cold',     name:'冰霜伤害',         bucket:'B', cat:'cold',      unit:'%' },
+  { id:'b_lightning',name:'闪电伤害',         bucket:'B', cat:'lightning', unit:'%' },
+  { id:'b_poison',   name:'毒素伤害',         bucket:'B', cat:'poison',    unit:'%' },
+  { id:'b_shadow',   name:'暗影伤害',         bucket:'B', cat:'shadow',    unit:'%' },
+  { id:'b_physical', name:'物理伤害',         bucket:'B', cat:'physical',  unit:'%' },
+  { id:'b_close',    name:'近战范围伤害',     bucket:'B', cat:'close',     unit:'%' },
+  { id:'b_distant',  name:'远程范围伤害',     bucket:'B', cat:'distant',   unit:'%' },
+  { id:'b_elite',    name:'精英伤害',         bucket:'B', cat:'elite',     unit:'%' },
+  { id:'b_overpower',name:'超载伤害',         bucket:'B', cat:'overpower', unit:'%' },
+  { id:'b_bleed',    name:'出血伤害',         bucket:'B', cat:'bleed',     unit:'%' },
+  { id:'b_burn',     name:'燃烧伤害',         bucket:'B', cat:'burn',      unit:'%' },
+  { id:'b_stun',     name:'击晕伤害',         bucket:'B', cat:'stun',      unit:'%' },
+  { id:'c_legend',   name:'传奇词条加成',     bucket:'C',        unit:'%' },
+  { id:'c_unique',   name:'独特词条加成',     bucket:'C',        unit:'%' },
+  { id:'custom',     name:'— 自定义词缀 —',   bucket:'C',        unit:'%', isCustom:true },
+];
+const PM = Object.fromEntries(PRESETS.map(p => [p.id, p]));
+
+// ─── Slot definitions + paper doll grid layout ────────
+// Grid: 3 cols × 5 rows. null = empty, 'char' = silhouette
+const SLOT_DEFS = {
+  helm:    { name:'头盔', icon:'⛑', type:'头部防具' },
+  chest:   { name:'胸甲', icon:'🥋', type:'躯干防具' },
+  gloves:  { name:'手套', icon:'🧤', type:'手部防具' },
+  pants:   { name:'裤子', icon:'🩲', type:'腿部防具' },
+  boots:   { name:'靴子', icon:'👢', type:'脚部防具' },
+  weapon:  { name:'武器', icon:'⚔',  type:'主手武器' },
+  offhand: { name:'副手', icon:'🛡', type:'副手装备' },
+  ring1:   { name:'戒指1',icon:'💍', type:'戒指' },
+  ring2:   { name:'戒指2',icon:'💍', type:'戒指' },
+  amulet:  { name:'护符', icon:'📿', type:'项链' },
+};
+
+// grid-area layout:  row × col (0-indexed)
+// [row][col]: slotId | null | 'char'
+const DOLL_LAYOUT = [
+  [ null,    'helm',    null    ],
+  [ 'offhand','char',  'weapon' ],
+  [ 'ring1',  'char',  'ring2'  ],
+  [ 'gloves', 'chest', 'boots'  ],
+  [ null,    'pants',   null    ],
+  [ null,    'amulet',  null    ],
+];
+
+// ─── State ────────────────────────────────────────────
+let state = {
+  globalCritRate: 5,
+  globalSkillBonus: 0,
+  slots: Object.fromEntries(Object.keys(SLOT_DEFS).map(id => [id, { affixes:[] }])),
+  selectedSlot: null,
+  compareMode: false,
+  candidateAffixes: [],
+};
+
+let _uid = 1;
+const uid = () => _uid++;
+const newAffix = (pid='a_dmg') => ({
+  id: uid(), presetId: pid,
+  customName:'', customBucket:'C', customCat:'',
+  value: 0,
+});
+
+// ─── Helpers ──────────────────────────────────────────
+const getBucket = a => a.presetId === 'custom' ? (a.customBucket || 'C') : (PM[a.presetId]?.bucket || 'C');
+const getCat    = a => a.presetId === 'custom' ? (a.customCat || 'custom_'+a.id) : (PM[a.presetId]?.cat || a.presetId);
+const getName   = a => a.presetId === 'custom' ? (a.customName || '自定义词缀') : (PM[a.presetId]?.name || '?');
+const getUnit   = a => (a.presetId === 'custom' || PM[a.presetId]?.unit !== 'pts') ? '%' : '';
+
+const BULLET_CLASS = {
+  A:'bullet-A', B:'bullet-B', C:'bullet-C',
+  skill:'bullet-skill', mainstat:'bullet-mainstat',
+  critrate:'bullet-critrate', critdmg:'bullet-critdmg', atkspd:'bullet-atkspd',
+};
+
+// ─── Calculation ──────────────────────────────────────
+function calcStats(affixes, baseCrit, skillBonus) {
+  let mainStat=0, skillMults=[], aSum=0, bCats={}, cMults=[];
+  let critRate=baseCrit, critDmg=0, atkSpd=0;
+
+  for (const a of affixes) {
+    const b = getBucket(a), v = parseFloat(a.value)||0;
+    if (b==='mainstat')  mainStat += v;
+    else if (b==='skill') skillMults.push(v);
+    else if (b==='A')     aSum += v;
+    else if (b==='B')  { const c=getCat(a); bCats[c]=(bCats[c]||0)+v; }
+    else if (b==='C')     cMults.push(v);
+    else if (b==='critrate') critRate += v;
+    else if (b==='critdmg')  critDmg  += v;
+    else if (b==='atkspd')   atkSpd   += v;
+  }
+
+  const skillMult    = skillMults.reduce((s,v)=>s*(1+v/100), 1+skillBonus/100);
+  const mainStatMult = 1 + mainStat*0.001;
+  const aMult        = 1 + aSum/100;
+  const bMult        = Object.values(bCats).reduce((s,v)=>s*(1+v/100), 1);
+  const cMult        = cMults.reduce((s,v)=>s*(1+v/100), 1);
+  const baseDmg      = skillMult * mainStatMult * aMult * bMult * cMult;
+  const cr           = Math.min(critRate,100)/100, cd = critDmg/100;
+  const expectedDmg  = baseDmg*(1+cr*cd);
+  const atkSpdMult   = 1+atkSpd/100;
+
+  return { mainStat, critRate, critDmg, atkSpd,
+           skillMult, mainStatMult, aMult, bMult, cMult,
+           baseDmg, expectedDmg, atkSpdMult };
+}
+
+function getAllAffixes(excludeSlot=null) {
+  const all = [];
+  for (const [id,slot] of Object.entries(state.slots)) {
+    if (id===excludeSlot) continue;
+    all.push(...slot.affixes);
+  }
+  return all;
+}
+
+// ─── Render: Paper Doll ───────────────────────────────
+function renderDoll() {
+  const grid = document.getElementById('doll-grid');
+  grid.innerHTML = '';
+
+  // Update grid template
+  grid.style.gridTemplateRows = `repeat(${DOLL_LAYOUT.length}, 64px)`;
+
+  for (let r=0; r<DOLL_LAYOUT.length; r++) {
+    const row = DOLL_LAYOUT[r];
+    for (let c=0; c<3; c++) {
+      const id = row[c];
+      const cell = document.createElement('div');
+
+      if (!id) {
+        cell.className = 'slot-cell empty-cell';
+      } else if (id==='char') {
+        // Silhouette cells merged via JS rowspan hack: just render the first one
+        // Use a regular cell with silhouette if r===1 (first char row)
+        if (r===1) {
+          cell.className = 'slot-cell char-cell';
+          cell.style.gridRow = '2 / 4'; // span rows 2-3
+          cell.innerHTML = `<div class="char-silhouette"><span class="char-head">😐</span><span class="char-body">🧍</span></div>`;
+        } else {
+          // skip — already covered by span
+          continue;
+        }
+      } else {
+        const def = SLOT_DEFS[id];
+        const slot = state.slots[id];
+        const hasData = slot.affixes.length > 0;
+        const isActive = state.selectedSlot === id;
+        cell.className = 'slot-cell' +
+          (hasData  ? ' has-data' : '') +
+          (isActive ? ' active'   : '');
+        cell.innerHTML = `
+          <div class="slot-dot"></div>
+          <div class="slot-icon">${def.icon}</div>
+          <div class="slot-label">${def.name}</div>
+          ${hasData ? `<div class="slot-count-badge">${slot.affixes.length}</div>` : ''}
+        `;
+        cell.onclick = () => selectSlot(id);
+      }
+      grid.appendChild(cell);
+    }
+  }
+}
+
+// ─── Render: Editor ───────────────────────────────────
+function renderEditor() {
+  const barName    = document.getElementById('editor-bar-name');
+  const barType    = document.getElementById('editor-bar-type');
+  const barActions = document.getElementById('editor-bar-actions');
+  const body       = document.getElementById('editor-body');
+
+  if (!state.selectedSlot) {
+    barName.textContent = '选择装备槽位';
+    barType.textContent = '';
+    barActions.innerHTML = '';
+    body.className = 'editor-body single';
+    body.innerHTML = `<div class="empty-editor"><div class="empty-rune">🔱</div><div class="empty-text">选择左侧装备槽位</div></div>`;
+    return;
+  }
+
+  const def  = SLOT_DEFS[state.selectedSlot];
+  const slot = state.slots[state.selectedSlot];
+
+  barName.textContent = def.name.toUpperCase();
+  barType.textContent = def.type;
+
+  barActions.innerHTML = '';
+
+  const btnClear = document.createElement('button');
+  btnClear.className = 'ebtn';
+  btnClear.textContent = '清空';
+  btnClear.onclick = () => { slot.affixes=[]; render(); };
+
+  const btnCmp = document.createElement('button');
+  btnCmp.className = 'ebtn compare-btn' + (state.compareMode ? ' active' : '');
+  btnCmp.textContent = state.compareMode ? '◀ 对比中' : '对比候选';
+  btnCmp.onclick = toggleCompare;
+
+  barActions.appendChild(btnClear);
+  barActions.appendChild(btnCmp);
+
+  if (state.compareMode) {
+    body.className = 'editor-body dual';
+    body.innerHTML = '';
+    body.appendChild(buildCard(slot.affixes, state.selectedSlot, def.name, false));
+    body.appendChild(buildCard(state.candidateAffixes, 'candidate', def.name + ' (候选)', true));
+  } else {
+    body.className = 'editor-body single';
+    body.innerHTML = '';
+    body.appendChild(buildCard(slot.affixes, state.selectedSlot, def.name, false));
+  }
+}
+
+function buildCard(affixes, targetId, title, isCandidate) {
+  const card = document.createElement('div');
+  card.className = 'item-card';
+
+  // Header
+  const hdr = document.createElement('div');
+  hdr.className = 'card-header';
+  hdr.innerHTML = `
+    <div class="card-title${isCandidate?' candidate':''}">${title.toUpperCase()}</div>
+    <div class="card-subtitle">${isCandidate ? '候选替换装备' : '当前装备词缀'}</div>
+  `;
+  card.appendChild(hdr);
+
+  // Divider
+  const div = document.createElement('div');
+  div.className = 'card-divider';
+  div.innerHTML = `<div class="card-divider-line"></div><div class="card-divider-gem">◆</div><div class="card-divider-line"></div>`;
+  card.appendChild(div);
+
+  // Body
+  const body = document.createElement('div');
+  body.className = 'card-body';
+
+  for (let i=0; i<affixes.length; i++) {
+    body.appendChild(buildAffixRow(affixes[i], i, targetId));
+  }
+
+  const addWrap = document.createElement('div');
+  addWrap.className = 'add-affix-wrap';
+  const addBtn = document.createElement('button');
+  addBtn.className = 'btn-add';
+  addBtn.textContent = '+ 添加词缀';
+  addBtn.onclick = () => addAffix(targetId);
+  addWrap.appendChild(addBtn);
+  body.appendChild(addWrap);
+
+  card.appendChild(body);
+  return card;
+}
+
+function buildAffixRow(affix, index, targetId) {
+  const bucket  = getBucket(affix);
+  const isCustom = affix.presetId === 'custom';
+  const bCls    = BULLET_CLASS[bucket] || 'bullet-C';
+
+  const row = document.createElement('div');
+  row.className = `affix-row bucket-${bucket}`;
+
+  // Bullet
+  const bull = document.createElement('div');
+  bull.className = `affix-bullet ${bCls}`;
+  row.appendChild(bull);
+
+  // Preset select
+  const sel = document.createElement('select');
+  sel.className = 'affix-select';
+  sel.innerHTML = buildPresetOpts(affix.presetId);
+  sel.onchange = e => {
+    affix.presetId = e.target.value;
+    if (e.target.value !== 'custom') { affix.customName=''; affix.customBucket='C'; }
+    updateState(targetId);
+    render();
+  };
+  row.appendChild(sel);
+
+  if (isCustom) {
+    const cn = document.createElement('input');
+    cn.className = 'affix-custom-name';
+    cn.type = 'text'; cn.placeholder = '词缀名';
+    cn.value = affix.customName || '';
+    cn.oninput = e => { affix.customName=e.target.value; saveState(); renderResults(); };
+    row.appendChild(cn);
+
+    const cb = document.createElement('select');
+    cb.className = 'affix-bucket-sel';
+    cb.innerHTML = [
+      ['A','A桶'],['B','B桶'],['C','C桶'],
+      ['skill','技能'],['mainstat','主属性'],
+      ['critrate','暴击率'],['critdmg','暴击伤'],['atkspd','攻速'],
+    ].map(([v,l])=>`<option value="${v}"${affix.customBucket===v?' selected':''}>${l}</option>`).join('');
+    cb.onchange = e => { affix.customBucket=e.target.value; updateState(targetId); render(); };
+    row.appendChild(cb);
+  }
+
+  const val = document.createElement('input');
+  val.className = 'affix-val';
+  val.type='number'; val.step='0.1'; val.value=affix.value;
+  val.oninput = e => { affix.value=parseFloat(e.target.value)||0; saveState(); renderResults(); };
+  row.appendChild(val);
+
+  const unit = document.createElement('span');
+  unit.className = 'affix-unit';
+  unit.textContent = getUnit(affix);
+  row.appendChild(unit);
+
+  const rm = document.createElement('button');
+  rm.className = 'btn-rm'; rm.textContent = '×';
+  rm.onclick = () => removeAffix(targetId, index);
+  row.appendChild(rm);
+
+  return row;
+}
+
+function buildPresetOpts(selectedId) {
+  const groups = [
+    ['特殊属性',   ['mainstat','skill_dmg','crit_rate','crit_dmg','atk_spd']],
+    ['A桶 — 加法',  PRESETS.filter(p=>p.bucket==='A').map(p=>p.id)],
+    ['B桶 — 前置乘',PRESETS.filter(p=>p.bucket==='B').map(p=>p.id)],
+    ['C桶 — 独立乘',['c_legend','c_unique']],
+    ['自定义',      ['custom']],
+  ];
+  return groups.map(([label,ids])=>
+    `<optgroup label="${label}">${
+      ids.map(id=>PM[id]?`<option value="${id}"${id===selectedId?' selected':''}>${PM[id].name}</option>`:'').join('')
+    }</optgroup>`
+  ).join('');
+}
+
+// ─── Render: Results ──────────────────────────────────
+function renderResults() {
+  const body = document.getElementById('results-body');
+  const allAffixes = getAllAffixes();
+
+  let html = '';
+  if (state.compareMode && state.selectedSlot) {
+    const base = getAllAffixes(state.selectedSlot);
+    const curS  = calcStats([...base,...state.slots[state.selectedSlot].affixes], state.globalCritRate, state.globalSkillBonus);
+    const candS = calcStats([...base,...state.candidateAffixes], state.globalCritRate, state.globalSkillBonus);
+    html = htmlCompare(curS, candS);
+  } else {
+    const s = calcStats(allAffixes, state.globalCritRate, state.globalSkillBonus);
+    html = htmlSingle(s);
+  }
+  body.innerHTML = html;
+}
+
+const fm  = (v,d=2) => v.toFixed(d);
+const fmx = v => `×${fm(v)}`;
+const fmP = v => `${v>=0?'+':''}${fm(v*100,1)}%`;
+
+function dHtml(cur, cand) {
+  const d = cand/cur-1;
+  if (Math.abs(d)<0.0001) return `<span class="delta zero">—</span>`;
+  return `<span class="delta ${d>0?'pos':'neg'}">${fmP(d)}</span>`;
+}
+
+function htmlSingle(s) {
+  return `
+  <div class="res-section">
+    <div class="res-section-label">乘区分解</div>
+    <div class="res-row"><span class="res-label">技能倍率</span><span class="res-val gold">${fmx(s.skillMult)}</span></div>
+    <div class="res-row"><span class="res-label">主属性 (${Math.round(s.mainStat)})</span><span class="res-val gold">${fmx(s.mainStatMult)}</span></div>
+    <div class="res-row"><span class="res-label">A桶 加法</span><span class="res-val magic">${fmx(s.aMult)}</span></div>
+    <div class="res-row"><span class="res-label">B桶 前置乘</span><span class="res-val rare">${fmx(s.bMult)}</span></div>
+    <div class="res-row"><span class="res-label">C桶 独立乘</span><span class="res-val legend">${fmx(s.cMult)}</span></div>
+  </div>
+  <div class="res-divider"></div>
+  <div class="res-section">
+    <div class="res-section-label">暴击参数</div>
+    <div class="res-row"><span class="res-label">暴击率</span><span class="res-val">${fm(s.critRate,1)}%</span></div>
+    <div class="res-row"><span class="res-label">暴击伤害</span><span class="res-val">${fm(s.critDmg,1)}%</span></div>
+  </div>
+  <div class="res-divider"></div>
+  <div class="res-big">
+    <div class="res-big-label">基础伤害倍率</div>
+    <div class="res-big-val">${fmx(s.baseDmg)}</div>
+  </div>
+  <div class="res-big" style="margin-top:8px">
+    <div class="res-big-label">期望伤害（含暴击）</div>
+    <div class="res-big-val">${fmx(s.expectedDmg)}</div>
+  </div>
+  <div class="res-divider"></div>
+  <div class="res-section">
+    <div class="res-section-label">攻速（独立）</div>
+    <div class="res-row"><span class="res-label">攻速加成</span><span class="res-val">${fm(s.atkSpd,1)}%</span></div>
+    <div class="res-row"><span class="res-label">攻速倍率</span><span class="res-val gold">${fmx(s.atkSpdMult)}</span></div>
+  </div>`;
+}
+
+function htmlCompare(c, d) {
+  const ed = d.expectedDmg/c.expectedDmg-1;
+  const edCls = Math.abs(ed)<0.0001 ? '' : ed>0 ? ' pos' : ' neg';
+  return `
+  <div class="res-section">
+    <div class="res-section-label">乘区对比</div>
+    <div class="res-row"><span class="res-label">技能倍率</span>${dHtml(c.skillMult,d.skillMult)}</div>
+    <div class="res-row"><span class="res-label">主属性倍率</span>${dHtml(c.mainStatMult,d.mainStatMult)}</div>
+    <div class="res-row"><span class="res-label">A桶</span>${dHtml(c.aMult,d.aMult)}</div>
+    <div class="res-row"><span class="res-label">B桶</span>${dHtml(c.bMult,d.bMult)}</div>
+    <div class="res-row"><span class="res-label">C桶</span>${dHtml(c.cMult,d.cMult)}</div>
+  </div>
+  <div class="res-divider"></div>
+  <div class="res-section">
+    <div class="res-section-label">暴击参数</div>
+    <div class="res-row"><span class="res-label">暴击率</span><span class="res-val">${fm(c.critRate,1)}% → ${fm(d.critRate,1)}%</span></div>
+    <div class="res-row"><span class="res-label">暴击伤害</span><span class="res-val">${fm(c.critDmg,1)}% → ${fm(d.critDmg,1)}%</span></div>
+  </div>
+  <div class="res-divider"></div>
+  <div class="res-section">
+    <div class="res-section-label">绝对值</div>
+    <div class="res-row"><span class="res-label">当前期望</span><span class="res-val gold">${fmx(c.expectedDmg)}</span></div>
+    <div class="res-row"><span class="res-label">候选期望</span><span class="res-val gold">${fmx(d.expectedDmg)}</span></div>
+  </div>
+  <div class="res-divider"></div>
+  <div class="res-big">
+    <div class="res-big-label">期望伤害变化</div>
+    <div class="res-big-val${edCls}">${fmP(ed)}</div>
+  </div>
+  <div class="res-divider"></div>
+  <div class="res-section">
+    <div class="res-section-label">攻速（独立）</div>
+    <div class="res-row"><span class="res-label">当前攻速</span><span class="res-val">${fmx(c.atkSpdMult)}</span></div>
+    <div class="res-row"><span class="res-label">攻速变化</span>${dHtml(c.atkSpdMult,d.atkSpdMult)}</div>
+  </div>`;
+}
+
+// ─── Actions ──────────────────────────────────────────
+function selectSlot(id) {
+  if (state.selectedSlot===id && !state.compareMode) return;
+  state.selectedSlot = id;
+  state.compareMode = false;
+  state.candidateAffixes = [];
+  render();
+}
+
+function toggleCompare() {
+  state.compareMode = !state.compareMode;
+  if (state.compareMode) {
+    state.candidateAffixes = state.slots[state.selectedSlot].affixes.map(a=>({...a,id:uid()}));
+  } else {
+    state.candidateAffixes = [];
+  }
+  render();
+}
+
+function addAffix(targetId) {
+  const a = newAffix('a_dmg');
+  if (targetId==='candidate') state.candidateAffixes.push(a);
+  else state.slots[targetId].affixes.push(a);
+  render();
+}
+
+function removeAffix(targetId, idx) {
+  if (targetId==='candidate') state.candidateAffixes.splice(idx,1);
+  else state.slots[targetId].affixes.splice(idx,1);
+  render();
+}
+
+function updateState(targetId) { saveState(); }
+
+// ─── Persistence ──────────────────────────────────────
+function saveState() {
+  localStorage.setItem('d4calc_v2', JSON.stringify({
+    globalCritRate: state.globalCritRate,
+    globalSkillBonus: state.globalSkillBonus,
+    slots: state.slots,
+  }));
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem('d4calc_v2');
+    if (!raw) return;
+    const d = JSON.parse(raw);
+    state.globalCritRate   = d.globalCritRate   ?? 5;
+    state.globalSkillBonus = d.globalSkillBonus ?? 0;
+    if (d.slots) {
+      for (const [id,slot] of Object.entries(d.slots)) {
+        if (state.slots[id] && Array.isArray(slot.affixes)) {
+          state.slots[id].affixes = slot.affixes;
+          slot.affixes.forEach(a => { if (!a.id) a.id=uid(); else _uid=Math.max(_uid,a.id+1); });
+        }
+      }
+    }
+    document.getElementById('g-crit-rate').value   = state.globalCritRate;
+    document.getElementById('g-skill-bonus').value = state.globalSkillBonus;
+  } catch(e) {}
+}
+
+function exportJSON() {
+  const blob = new Blob([JSON.stringify({globalCritRate:state.globalCritRate,globalSkillBonus:state.globalSkillBonus,slots:state.slots},null,2)],{type:'application/json'});
+  const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='d4-gear.json'; a.click();
+}
+function importJSON() { document.getElementById('import-file').click(); }
+function handleImport(e) {
+  const file=e.target.files[0]; if(!file) return;
+  new FileReader().onload = ev => {
+    try {
+      const d=JSON.parse(ev.target.result);
+      state.globalCritRate=d.globalCritRate??5;
+      state.globalSkillBonus=d.globalSkillBonus??0;
+      if(d.slots) for(const[id,slot]of Object.entries(d.slots)) {
+        if(state.slots[id]&&Array.isArray(slot.affixes)){ state.slots[id].affixes=slot.affixes; slot.affixes.forEach(a=>{if(!a.id)a.id=uid();}); }
+      }
+      document.getElementById('g-crit-rate').value=state.globalCritRate;
+      document.getElementById('g-skill-bonus').value=state.globalSkillBonus;
+      saveState(); render();
+    } catch(err){ alert('导入失败：'+err.message); }
+  };
+  const fr=new FileReader(); fr.onload=ev=>{ try{ const d=JSON.parse(ev.target.result); state.globalCritRate=d.globalCritRate??5; state.globalSkillBonus=d.globalSkillBonus??0; if(d.slots)for(const[id,slot]of Object.entries(d.slots)){if(state.slots[id]&&Array.isArray(slot.affixes)){state.slots[id].affixes=slot.affixes;slot.affixes.forEach(a=>{if(!a.id)a.id=uid();});}} document.getElementById('g-crit-rate').value=state.globalCritRate; document.getElementById('g-skill-bonus').value=state.globalSkillBonus; saveState();render(); }catch(err){alert('导入失败：'+err.message);} }; fr.readAsText(file); e.target.value='';
+}
+function clearAll() {
+  if(!confirm('清空所有装备数据？')) return;
+  for(const s of Object.values(state.slots)) s.affixes=[];
+  state.compareMode=false; state.candidateAffixes=[];
+  saveState(); render();
+}
+
+// ─── Master Render ────────────────────────────────────
+function render() {
+  renderDoll();
+  renderEditor();
+  renderResults();
+  saveState();
+}
+
+// ─── Init ─────────────────────────────────────────────
+document.getElementById('g-crit-rate').addEventListener('input', e=>{
+  state.globalCritRate=parseFloat(e.target.value)||0; saveState(); renderResults();
+});
+document.getElementById('g-skill-bonus').addEventListener('input', e=>{
+  state.globalSkillBonus=parseFloat(e.target.value)||0; saveState(); renderResults();
+});
+
+loadState();
+render();
+</script>
+</body>
+</html>
