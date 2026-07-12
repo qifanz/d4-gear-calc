@@ -1,35 +1,15 @@
-import type { AffixPreset, Affix, SlotDef, BucketType } from './types'
+import type { AffixPreset, Affix, SlotDef, BucketType, BScope } from './types'
 
 export const PRESETS: AffixPreset[] = [
   { id: 'mainstat',    name: '主属性',          bucket: 'mainstat', unit: 'pts' },
   { id: 'skill_dmg',   name: '技能伤害',         bucket: 'skill',    unit: '%' },
   { id: 'crit_rate',   name: '暴击率',           bucket: 'critrate', unit: '%' },
-  { id: 'crit_dmg',    name: '暴击伤害',         bucket: 'critdmg',  unit: '%' },
-  { id: 'dot_dmg',     name: '持续伤害',         bucket: 'dotdmg',   unit: '%' },
   { id: 'atk_spd',     name: '攻击速度',         bucket: 'atkspd',   unit: '%' },
-  { id: 'a_dmg',       name: '伤害加成(+)',      bucket: 'A',        unit: '%' },
-  { id: 'a_core',      name: '核心技能伤害(+)',  bucket: 'A',        unit: '%' },
-  { id: 'a_basic',     name: '基础技能伤害(+)',  bucket: 'A',        unit: '%' },
-  { id: 'a_wrath',     name: '愤怒技能伤害(+)',  bucket: 'A',        unit: '%' },
-  { id: 'a_macabre',   name: '阴森技能伤害(+)',  bucket: 'A',        unit: '%' },
-  { id: 'a_conjure',   name: '召唤技能伤害(+)',  bucket: 'A',        unit: '%' },
-  { id: 'a_trap',      name: '陷阱技能伤害(+)',  bucket: 'A',        unit: '%' },
-  { id: 'a_agility',   name: '敏捷技能伤害(+)',  bucket: 'A',        unit: '%' },
-  { id: 'a_companion', name: '同伴技能伤害(+)',  bucket: 'A',        unit: '%' },
-  { id: 'b_vul',       name: '易伤伤害',         bucket: 'B', cat: 'vul',       unit: '%' },
-  { id: 'b_fire',      name: '火焰伤害',         bucket: 'B', cat: 'fire',      unit: '%' },
-  { id: 'b_cold',      name: '冰霜伤害',         bucket: 'B', cat: 'cold',      unit: '%' },
-  { id: 'b_lightning', name: '闪电伤害',         bucket: 'B', cat: 'lightning', unit: '%' },
-  { id: 'b_poison',    name: '毒素伤害',         bucket: 'B', cat: 'poison',    unit: '%' },
-  { id: 'b_shadow',    name: '暗影伤害',         bucket: 'B', cat: 'shadow',    unit: '%' },
-  { id: 'b_physical',  name: '物理伤害',         bucket: 'B', cat: 'physical',  unit: '%' },
-  { id: 'b_close',     name: '近战范围伤害',     bucket: 'B', cat: 'close',     unit: '%' },
-  { id: 'b_distant',   name: '远程范围伤害',     bucket: 'B', cat: 'distant',   unit: '%' },
-  { id: 'b_elite',     name: '精英伤害',         bucket: 'B', cat: 'elite',     unit: '%' },
-  { id: 'b_overpower', name: '超载伤害',         bucket: 'B', cat: 'overpower', unit: '%' },
-  { id: 'b_bleed',     name: '出血伤害',         bucket: 'B', cat: 'bleed',     unit: '%' },
-  { id: 'b_burn',      name: '燃烧伤害',         bucket: 'B', cat: 'burn',      unit: '%' },
-  { id: 'b_stun',      name: '击晕伤害',         bucket: 'B', cat: 'stun',      unit: '%' },
+  { id: 'a_dmg',       name: 'A桶伤害(+)',       bucket: 'A',        unit: '%' },
+  { id: 'b_crit',      name: '暴击伤害',         bucket: 'B', cat: 'crit',      scope: 'crit', unit: '%' },
+  { id: 'b_vul',       name: '易伤伤害',         bucket: 'B', cat: 'vul',       scope: 'both', unit: '%' },
+  { id: 'b_elemental', name: '元素伤害',         bucket: 'B', cat: 'elemental', scope: 'both', unit: '%' },
+  { id: 'b_dot',       name: '持续伤害',         bucket: 'B', cat: 'dot',       scope: 'dot',  unit: '%' },
   { id: 'c_legend',    name: '传奇词条加成',     bucket: 'C',        unit: '%' },
   { id: 'c_unique',    name: '独特词条加成',     bucket: 'C',        unit: '%' },
   { id: 'custom',      name: '— 自定义词缀 —',   bucket: 'C',        unit: '%', isCustom: true },
@@ -68,9 +48,15 @@ export const BULLET_CLASS: Record<BucketType, string> = {
   skill:    'bullet-skill',
   mainstat: 'bullet-mainstat',
   critrate: 'bullet-critrate',
-  critdmg:  'bullet-critdmg',
-  dotdmg:   'bullet-dotdmg',
   atkspd:   'bullet-atkspd',
+}
+
+// B桶内按类别（暴击/持续/易伤/元素）区分颜色，即便它们同属B桶
+const B_CAT_BULLET: Record<string, string> = {
+  crit:      'bullet-b-crit',
+  dot:       'bullet-b-dot',
+  vul:       'bullet-b-vul',
+  elemental: 'bullet-b-elemental',
 }
 
 export function getBucket(a: Affix): BucketType {
@@ -81,6 +67,17 @@ export function getBucket(a: Affix): BucketType {
 export function getCat(a: Affix): string {
   if (a.presetId === 'custom') return a.customCat || `custom_${a.id}`
   return PRESET_MAP[a.presetId]?.cat ?? a.presetId
+}
+
+export function getScope(a: Affix): BScope {
+  if (a.presetId === 'custom') return a.customScope || 'both'
+  return PRESET_MAP[a.presetId]?.scope ?? 'both'
+}
+
+export function getBulletClass(a: Affix): string {
+  const bucket = getBucket(a)
+  if (bucket === 'B') return B_CAT_BULLET[getCat(a)] ?? BULLET_CLASS.B
+  return BULLET_CLASS[bucket]
 }
 
 export function getAffixName(a: Affix): string {
@@ -95,9 +92,9 @@ export function getUnit(a: Affix): string {
 
 export function buildPresetOptions(selectedId: string): string {
   const groups: [string, string[]][] = [
-    ['特殊属性',    ['mainstat', 'skill_dmg', 'crit_rate', 'crit_dmg', 'dot_dmg', 'atk_spd']],
-    ['A桶 — 加法',  PRESETS.filter(p => p.bucket === 'A').map(p => p.id)],
-    ['B桶 — 前置乘', PRESETS.filter(p => p.bucket === 'B').map(p => p.id)],
+    ['特殊属性',    ['mainstat', 'skill_dmg', 'crit_rate', 'atk_spd']],
+    ['A桶 — 加法',  ['a_dmg']],
+    ['B桶 — 前置乘', ['b_crit', 'b_vul', 'b_elemental', 'b_dot']],
     ['C桶 — 独立乘', ['c_legend', 'c_unique']],
     ['自定义',      ['custom']],
   ]

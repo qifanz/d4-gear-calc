@@ -1,5 +1,5 @@
 import type { Affix, StatsResult } from './types'
-import { getBucket, getCat } from './presets'
+import { getBucket, getCat, getScope } from './presets'
 
 export function calcStats(
   affixes: Affix[],
@@ -25,14 +25,18 @@ export function calcStats(
       case 'skill':     skillMults.push(v); break
       case 'A':         aSum += v; break
       case 'B': {
-        const cat = getCat(a)
-        bCats[cat] = (bCats[cat] ?? 0) + v
+        // B桶内暴击伤害/持续伤害只喂各自路径；其余类别（易伤、元素伤等）两条路径共享
+        const scope = getScope(a)
+        if (scope === 'crit') critDmg += v
+        else if (scope === 'dot') dotDmg += v
+        else {
+          const cat = getCat(a)
+          bCats[cat] = (bCats[cat] ?? 0) + v
+        }
         break
       }
       case 'C':         cMults.push(v); break
       case 'critrate':  critRate += v; break
-      case 'critdmg':   critDmg  += v; break
-      case 'dotdmg':    dotDmg   += v; break
       case 'atkspd':    atkSpd   += v; break
     }
   }

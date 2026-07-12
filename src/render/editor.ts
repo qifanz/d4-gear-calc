@@ -1,6 +1,6 @@
 import { state, addAffix, removeAffix, clearSlot, toggleCompare, saveState } from '../state'
-import { SLOT_DEFS, BULLET_CLASS, getBucket, getUnit, buildPresetOptions } from '../presets'
-import type { Affix, BucketType } from '../types'
+import { SLOT_DEFS, getBucket, getCat, getUnit, getBulletClass, buildPresetOptions } from '../presets'
+import type { Affix, BucketType, BScope } from '../types'
 
 export function renderEditor(): void {
   const barName    = document.getElementById('editor-bar-name')!
@@ -97,10 +97,10 @@ function buildCard(affixes: Affix[], targetId: string, title: string, isCandidat
 function buildAffixRow(affix: Affix, index: number, targetId: string): HTMLElement {
   const bucket   = getBucket(affix)
   const isCustom = affix.presetId === 'custom'
-  const bulletCls = BULLET_CLASS[bucket]
+  const bulletCls = getBulletClass(affix)
 
   const row = document.createElement('div')
-  row.className = `affix-row bucket-${bucket}`
+  row.className = `affix-row bucket-${bucket}` + (bucket === 'B' ? ` bcat-${getCat(affix)}` : '')
 
   const bullet = document.createElement('div')
   bullet.className = `affix-bullet ${bulletCls}`
@@ -138,7 +138,7 @@ function buildAffixRow(affix: Affix, index: number, targetId: string): HTMLEleme
     const bucketOptions: [BucketType, string][] = [
       ['A', 'A桶'], ['B', 'B桶'], ['C', 'C桶'],
       ['skill', '技能'], ['mainstat', '主属性'],
-      ['critrate', '暴击率'], ['critdmg', '暴击伤'], ['dotdmg', '持续伤'], ['atkspd', '攻速'],
+      ['critrate', '暴击率'], ['atkspd', '攻速'],
     ]
     bucketSel.innerHTML = bucketOptions
       .map(([v, l]) => `<option value="${v}"${affix.customBucket === v ? ' selected' : ''}>${l}</option>`)
@@ -149,6 +149,23 @@ function buildAffixRow(affix: Affix, index: number, targetId: string): HTMLEleme
       window.dispatchEvent(new CustomEvent('d4:render'))
     })
     row.appendChild(bucketSel)
+
+    if (affix.customBucket === 'B') {
+      const scopeSel = document.createElement('select')
+      scopeSel.className = 'affix-scope-sel'
+      const scopeOptions: [BScope, string][] = [
+        ['both', '两者共享'], ['crit', '仅暴击'], ['dot', '仅持续'],
+      ]
+      scopeSel.innerHTML = scopeOptions
+        .map(([v, l]) => `<option value="${v}"${(affix.customScope || 'both') === v ? ' selected' : ''}>${l}</option>`)
+        .join('')
+      scopeSel.addEventListener('change', () => {
+        affix.customScope = scopeSel.value as BScope
+        saveState()
+        window.dispatchEvent(new CustomEvent('d4:results'))
+      })
+      row.appendChild(scopeSel)
+    }
   }
 
   const valInput = document.createElement('input')

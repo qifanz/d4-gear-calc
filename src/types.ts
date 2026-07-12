@@ -1,7 +1,11 @@
 export type BucketType =
   | 'mainstat' | 'skill'
   | 'A' | 'B' | 'C'
-  | 'critrate' | 'critdmg' | 'dotdmg' | 'atkspd'
+  | 'critrate' | 'atkspd'
+
+// B桶内的适用范围：暴击伤害只喂给暴击路径，持续伤害只喂给持续路径，
+// 易伤/元素伤等其余B桶类别两条路径共享
+export type BScope = 'both' | 'crit' | 'dot'
 
 export interface AffixPreset {
   id: string
@@ -9,6 +13,7 @@ export interface AffixPreset {
   bucket: BucketType
   unit: 'pts' | '%'
   cat?: string
+  scope?: BScope
   isCustom?: boolean
 }
 
@@ -18,6 +23,7 @@ export interface Affix {
   customName: string
   customBucket: BucketType
   customCat: string
+  customScope: BScope
   value: number
 }
 

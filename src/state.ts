@@ -13,6 +13,7 @@ export function newAffix(presetId = 'a_dmg'): Affix {
     customName: '',
     customBucket: 'C' as BucketType,
     customCat: '',
+    customScope: 'both',
     value: 0,
   }
 }
