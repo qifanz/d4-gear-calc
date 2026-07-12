@@ -270,6 +270,19 @@ header h1 {
 .affix-val  { width: 72px; background: rgba(0,0,0,0.5); border: 1px solid var(--border2); border-radius: 3px; padding: 7px 8px; font-size: 14px; font-family: 'Courier New', monospace; color: var(--text-br); text-align: right; flex-shrink: 0; }
 .affix-val:focus { outline: none; border-color: var(--gold); color: var(--gold3); }
 .affix-unit { color: var(--text-dim); font-size: 12px; width: 14px; flex-shrink: 0; }
+.btn-mw {
+  background: rgba(200,160,64,0.08);
+  border: 1px solid var(--border2);
+  color: var(--text-dim);
+  cursor: pointer;
+  padding: 4px 6px;
+  font-size: 10px;
+  font-family: 'Courier New', monospace;
+  border-radius: 2px;
+  transition: all 0.12s;
+  flex-shrink: 0;
+}
+.btn-mw:hover { border-color: var(--gold); color: var(--gold2); background: rgba(200,160,64,0.16); }
 .btn-rm { background: none; border: none; color: var(--border2); cursor: pointer; padding: 2px 4px; font-size: 16px; line-height: 1; border-radius: 2px; transition: all 0.12s; flex-shrink: 0; }
 .btn-rm:hover { color: var(--red2); background: rgba(160,60,60,0.15); }
 .add-affix-wrap { margin-top: 12px; }
@@ -288,6 +301,9 @@ header h1 {
 .res-section { display: flex; flex-direction: column; }
 .res-section-label { font-family: 'Cinzel', Georgia, serif; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 6px; padding-bottom: 4px; border-bottom: 1px solid var(--border); }
 .res-row { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; }
+.res-row-sub { padding: 3px 0 3px 14px; }
+.res-row-sub .res-label { font-size: 11px; opacity: 0.85; }
+.res-row-sub .res-val   { font-size: 12px; opacity: 0.85; }
 .res-label { color: var(--text-dim); font-size: 12px; }
 .res-val { font-family: 'Courier New', monospace; font-size: 13px; color: var(--text-br); }
 .res-val.gold   { color: var(--gold2); }

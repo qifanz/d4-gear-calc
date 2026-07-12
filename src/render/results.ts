@@ -1,5 +1,6 @@
 import { state, getAllAffixes } from '../state'
 import { calcStats } from '../calc'
+import { getCatLabel } from '../presets'
 import type { StatsResult } from '../types'
 
 const fm  = (v: number, d = 2): string => v.toFixed(d)
@@ -12,6 +13,24 @@ function deltaHtml(cur: number, cand: number): string {
   return `<span class="delta ${d > 0 ? 'pos' : 'neg'}">${fmP(d)}</span>`
 }
 
+function bCatRowsSingle(s: StatsResult): string {
+  const entries = Object.entries(s.bCats)
+  if (!entries.length) return ''
+  return entries.map(([cat, v]) =>
+    `<div class="res-row res-row-sub"><span class="res-label">${getCatLabel(cat)}</span><span class="res-val">${fm(v, 1)}%</span></div>`
+  ).join('')
+}
+
+function bCatRowsCompare(c: StatsResult, d: StatsResult): string {
+  const cats = Array.from(new Set([...Object.keys(c.bCats), ...Object.keys(d.bCats)]))
+  if (!cats.length) return ''
+  return cats.map(cat => {
+    const cv = c.bCats[cat] ?? 0
+    const dv = d.bCats[cat] ?? 0
+    return `<div class="res-row res-row-sub"><span class="res-label">${getCatLabel(cat)}</span><span class="res-val">${fm(cv, 1)}% → ${fm(dv, 1)}%</span></div>`
+  }).join('')
+}
+
 function htmlSingle(s: StatsResult): string {
   return `
     <div class="res-section">
@@ -20,6 +39,7 @@ function htmlSingle(s: StatsResult): string {
       <div class="res-row"><span class="res-label">主属性 (${Math.round(s.mainStat)}点)</span><span class="res-val gold">${fmx(s.mainStatMult)}</span></div>
       <div class="res-row"><span class="res-label">A桶 加法</span><span class="res-val magic">${fmx(s.aMult)}</span></div>
       <div class="res-row"><span class="res-label">B桶 前置乘</span><span class="res-val rare">${fmx(s.bMult)}</span></div>
+      ${bCatRowsSingle(s)}
       <div class="res-row"><span class="res-label">C桶 独立乘</span><span class="res-val legend">${fmx(s.cMult)}</span></div>
     </div>
     <div class="res-divider"></div>
@@ -63,6 +83,7 @@ function htmlCompare(c: StatsResult, d: StatsResult): string {
       <div class="res-row"><span class="res-label">主属性倍率</span>${deltaHtml(c.mainStatMult, d.mainStatMult)}</div>
       <div class="res-row"><span class="res-label">A桶</span>${deltaHtml(c.aMult, d.aMult)}</div>
       <div class="res-row"><span class="res-label">B桶</span>${deltaHtml(c.bMult, d.bMult)}</div>
+      ${bCatRowsCompare(c, d)}
       <div class="res-row"><span class="res-label">C桶</span>${deltaHtml(c.cMult, d.cMult)}</div>
     </div>
     <div class="res-divider"></div>

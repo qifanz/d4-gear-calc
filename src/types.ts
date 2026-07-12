@@ -55,6 +55,7 @@ export interface StatsResult {
   skillMult: number
   mainStatMult: number
   aMult: number
+  bCats: Record<string, number>
   bMult: number
   cMult: number
   baseDmg: number

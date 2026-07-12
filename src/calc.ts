@@ -59,7 +59,7 @@ export function calcStats(
 
   return {
     mainStat, critRate, critDmg, dotDmg, atkSpd,
-    skillMult, mainStatMult, aMult, bMult, cMult,
+    skillMult, mainStatMult, aMult, bCats, bMult, cMult,
     baseDmg, critDmgMult, dotDmgMult, expectedCritDmg, expectedDotDmg, atkSpdMult,
   }
 }

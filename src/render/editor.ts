@@ -185,6 +185,28 @@ function buildAffixRow(affix: Affix, index: number, targetId: string): HTMLEleme
   unit.textContent = getUnit(affix)
   row.appendChild(unit)
 
+  const mwDown = document.createElement('button')
+  mwDown.className = 'btn-mw'
+  mwDown.textContent = '÷1.5'
+  mwDown.title = '模拟精造降级（数值 ÷1.5）'
+  mwDown.addEventListener('click', () => {
+    affix.value = Math.round((affix.value / 1.5) * 100) / 100
+    saveState()
+    window.dispatchEvent(new CustomEvent('d4:render'))
+  })
+  row.appendChild(mwDown)
+
+  const mwUp = document.createElement('button')
+  mwUp.className = 'btn-mw'
+  mwUp.textContent = '×1.5'
+  mwUp.title = '模拟精造升级（数值 ×1.5）——配合「对比候选」，在候选栏把要降级的词条÷1.5、要升级的词条×1.5，即可看到换精造后的伤害变化'
+  mwUp.addEventListener('click', () => {
+    affix.value = Math.round((affix.value * 1.5) * 100) / 100
+    saveState()
+    window.dispatchEvent(new CustomEvent('d4:render'))
+  })
+  row.appendChild(mwUp)
+
   const rmBtn = document.createElement('button')
   rmBtn.className = 'btn-rm'
   rmBtn.textContent = '×'

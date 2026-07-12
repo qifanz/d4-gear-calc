@@ -59,6 +59,14 @@ const B_CAT_BULLET: Record<string, string> = {
   elemental: 'bullet-b-elemental',
 }
 
+// cat id -> 显示名，用于结果面板展开B桶明细（自定义词缀的cat直接显示原始id）
+export const B_CAT_LABEL: Record<string, string> =
+  Object.fromEntries(PRESETS.filter(p => p.bucket === 'B' && p.cat).map(p => [p.cat!, p.name]))
+
+export function getCatLabel(cat: string): string {
+  return B_CAT_LABEL[cat] ?? cat
+}
+
 export function getBucket(a: Affix): BucketType {
   if (a.presetId === 'custom') return a.customBucket
   return PRESET_MAP[a.presetId]?.bucket ?? 'C'
