@@ -1,7 +1,7 @@
 export type BucketType =
   | 'mainstat' | 'skill'
   | 'A' | 'B' | 'C'
-  | 'critrate' | 'critdmg' | 'atkspd'
+  | 'critrate' | 'critdmg' | 'dotdmg' | 'atkspd'
 
 export interface AffixPreset {
   id: string
@@ -44,6 +44,7 @@ export interface StatsResult {
   mainStat: number
   critRate: number
   critDmg: number
+  dotDmg: number
   atkSpd: number
   skillMult: number
   mainStatMult: number
@@ -51,6 +52,9 @@ export interface StatsResult {
   bMult: number
   cMult: number
   baseDmg: number
-  expectedDmg: number
+  critDmgMult: number
+  dotDmgMult: number
+  expectedCritDmg: number
+  expectedDotDmg: number
   atkSpdMult: number
 }

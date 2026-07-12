@@ -5,6 +5,7 @@ export const PRESETS: AffixPreset[] = [
   { id: 'skill_dmg',   name: '技能伤害',         bucket: 'skill',    unit: '%' },
   { id: 'crit_rate',   name: '暴击率',           bucket: 'critrate', unit: '%' },
   { id: 'crit_dmg',    name: '暴击伤害',         bucket: 'critdmg',  unit: '%' },
+  { id: 'dot_dmg',     name: '持续伤害',         bucket: 'dotdmg',   unit: '%' },
   { id: 'atk_spd',     name: '攻击速度',         bucket: 'atkspd',   unit: '%' },
   { id: 'a_dmg',       name: '伤害加成(+)',      bucket: 'A',        unit: '%' },
   { id: 'a_core',      name: '核心技能伤害(+)',  bucket: 'A',        unit: '%' },
@@ -68,6 +69,7 @@ export const BULLET_CLASS: Record<BucketType, string> = {
   mainstat: 'bullet-mainstat',
   critrate: 'bullet-critrate',
   critdmg:  'bullet-critdmg',
+  dotdmg:   'bullet-dotdmg',
   atkspd:   'bullet-atkspd',
 }
 
@@ -93,7 +95,7 @@ export function getUnit(a: Affix): string {
 
 export function buildPresetOptions(selectedId: string): string {
   const groups: [string, string[]][] = [
-    ['特殊属性',    ['mainstat', 'skill_dmg', 'crit_rate', 'crit_dmg', 'atk_spd']],
+    ['特殊属性',    ['mainstat', 'skill_dmg', 'crit_rate', 'crit_dmg', 'dot_dmg', 'atk_spd']],
     ['A桶 — 加法',  PRESETS.filter(p => p.bucket === 'A').map(p => p.id)],
     ['B桶 — 前置乘', PRESETS.filter(p => p.bucket === 'B').map(p => p.id)],
     ['C桶 — 独立乘', ['c_legend', 'c_unique']],

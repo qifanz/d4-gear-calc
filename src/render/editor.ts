@@ -138,7 +138,7 @@ function buildAffixRow(affix: Affix, index: number, targetId: string): HTMLEleme
     const bucketOptions: [BucketType, string][] = [
       ['A', 'A桶'], ['B', 'B桶'], ['C', 'C桶'],
       ['skill', '技能'], ['mainstat', '主属性'],
-      ['critrate', '暴击率'], ['critdmg', '暴击伤'], ['atkspd', '攻速'],
+      ['critrate', '暴击率'], ['critdmg', '暴击伤'], ['dotdmg', '持续伤'], ['atkspd', '攻速'],
     ]
     bucketSel.innerHTML = bucketOptions
       .map(([v, l]) => `<option value="${v}"${affix.customBucket === v ? ' selected' : ''}>${l}</option>`)

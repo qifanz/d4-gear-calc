@@ -24,18 +24,23 @@ function htmlSingle(s: StatsResult): string {
     </div>
     <div class="res-divider"></div>
     <div class="res-section">
-      <div class="res-section-label">暴击参数</div>
+      <div class="res-section-label">暴击 / 持续 参数</div>
       <div class="res-row"><span class="res-label">暴击率</span><span class="res-val">${fm(s.critRate, 1)}%</span></div>
       <div class="res-row"><span class="res-label">暴击伤害</span><span class="res-val">${fm(s.critDmg, 1)}%</span></div>
+      <div class="res-row"><span class="res-label">持续伤害</span><span class="res-val">${fm(s.dotDmg, 1)}%</span></div>
     </div>
     <div class="res-divider"></div>
     <div class="res-big">
-      <div class="res-big-label">基础伤害倍率</div>
+      <div class="res-big-label">基础伤害倍率（共享乘区）</div>
       <div class="res-big-val">${fmx(s.baseDmg)}</div>
     </div>
     <div class="res-big" style="margin-top:8px">
-      <div class="res-big-label">期望伤害（含暴击）</div>
-      <div class="res-big-val">${fmx(s.expectedDmg)}</div>
+      <div class="res-big-label">直接伤害期望（含暴击）</div>
+      <div class="res-big-val">${fmx(s.expectedCritDmg)}</div>
+    </div>
+    <div class="res-big" style="margin-top:8px">
+      <div class="res-big-label">持续伤害期望（DoT，不暴击）</div>
+      <div class="res-big-val">${fmx(s.expectedDotDmg)}</div>
     </div>
     <div class="res-divider"></div>
     <div class="res-section">
@@ -47,8 +52,10 @@ function htmlSingle(s: StatsResult): string {
 }
 
 function htmlCompare(c: StatsResult, d: StatsResult): string {
-  const ed = d.expectedDmg / c.expectedDmg - 1
-  const edCls = Math.abs(ed) < 0.0001 ? '' : ed > 0 ? ' pos' : ' neg'
+  const ecrit = d.expectedCritDmg / c.expectedCritDmg - 1
+  const edot  = d.expectedDotDmg  / c.expectedDotDmg  - 1
+  const ecritCls = Math.abs(ecrit) < 0.0001 ? '' : ecrit > 0 ? ' pos' : ' neg'
+  const edotCls  = Math.abs(edot)  < 0.0001 ? '' : edot  > 0 ? ' pos' : ' neg'
   return `
     <div class="res-section">
       <div class="res-section-label">乘区对比</div>
@@ -60,20 +67,27 @@ function htmlCompare(c: StatsResult, d: StatsResult): string {
     </div>
     <div class="res-divider"></div>
     <div class="res-section">
-      <div class="res-section-label">暴击参数</div>
+      <div class="res-section-label">暴击 / 持续 参数</div>
       <div class="res-row"><span class="res-label">暴击率</span><span class="res-val">${fm(c.critRate,1)}% → ${fm(d.critRate,1)}%</span></div>
       <div class="res-row"><span class="res-label">暴击伤害</span><span class="res-val">${fm(c.critDmg,1)}% → ${fm(d.critDmg,1)}%</span></div>
+      <div class="res-row"><span class="res-label">持续伤害</span><span class="res-val">${fm(c.dotDmg,1)}% → ${fm(d.dotDmg,1)}%</span></div>
     </div>
     <div class="res-divider"></div>
     <div class="res-section">
       <div class="res-section-label">绝对值</div>
-      <div class="res-row"><span class="res-label">当前期望</span><span class="res-val gold">${fmx(c.expectedDmg)}</span></div>
-      <div class="res-row"><span class="res-label">候选期望</span><span class="res-val gold">${fmx(d.expectedDmg)}</span></div>
+      <div class="res-row"><span class="res-label">当前直接期望</span><span class="res-val gold">${fmx(c.expectedCritDmg)}</span></div>
+      <div class="res-row"><span class="res-label">候选直接期望</span><span class="res-val gold">${fmx(d.expectedCritDmg)}</span></div>
+      <div class="res-row"><span class="res-label">当前持续期望</span><span class="res-val gold">${fmx(c.expectedDotDmg)}</span></div>
+      <div class="res-row"><span class="res-label">候选持续期望</span><span class="res-val gold">${fmx(d.expectedDotDmg)}</span></div>
     </div>
     <div class="res-divider"></div>
     <div class="res-big">
-      <div class="res-big-label">期望伤害变化</div>
-      <div class="res-big-val${edCls}">${fmP(ed)}</div>
+      <div class="res-big-label">直接伤害变化（含暴击）</div>
+      <div class="res-big-val${ecritCls}">${fmP(ecrit)}</div>
+    </div>
+    <div class="res-big" style="margin-top:8px">
+      <div class="res-big-label">持续伤害变化（DoT）</div>
+      <div class="res-big-val${edotCls}">${fmP(edot)}</div>
     </div>
     <div class="res-divider"></div>
     <div class="res-section">

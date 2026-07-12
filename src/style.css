@@ -20,6 +20,7 @@
   --skill:    #60c870;
   --crit:     #e06030;
   --atkspd:   #40b8d0;
+  --dot:      #48c090;
   --green2:   #80e080;
   --red2:     #e08080;
 }
@@ -218,6 +219,7 @@ header h1 {
 .bullet-mainstat { background: var(--red2);   box-shadow: 0 0 4px rgba(224,128,128,0.6); }
 .bullet-critrate { background: var(--crit);   box-shadow: 0 0 4px rgba(224,96,48,0.6); }
 .bullet-critdmg  { background: #e8b040;       box-shadow: 0 0 4px rgba(232,176,64,0.6); }
+.bullet-dotdmg   { background: var(--dot);    box-shadow: 0 0 4px rgba(72,192,144,0.6); }
 .bullet-atkspd   { background: var(--atkspd); box-shadow: 0 0 4px rgba(64,184,208,0.6); }
 
 .affix-select { flex: 1; min-width: 0; background: rgba(0,0,0,0.4); border: 1px solid var(--border2); border-radius: 2px; padding: 4px 6px; font-size: 11px; color: var(--text); }
@@ -229,6 +231,7 @@ header h1 {
 .affix-row.bucket-mainstat .affix-select { color: var(--red2); }
 .affix-row.bucket-critrate .affix-select { color: var(--crit); }
 .affix-row.bucket-critdmg .affix-select  { color: #e8b040; }
+.affix-row.bucket-dotdmg .affix-select   { color: var(--dot); }
 .affix-row.bucket-atkspd .affix-select   { color: var(--atkspd); }
 
 .affix-custom-name { width: 88px; background: rgba(0,0,0,0.4); border: 1px solid var(--border2); border-radius: 2px; padding: 4px 6px; font-size: 11px; color: var(--legend); }
